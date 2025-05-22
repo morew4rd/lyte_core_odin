@@ -5,6 +5,8 @@ import "core:c"
 
 _ :: c
 
+LYTE_CORE_WASM_LIB :: #config(LYTE_CORE_WASM_LIB, "lyte_web/liblyte_core.a")
+
 
 // -------------------------
 // core data types
@@ -33,9 +35,24 @@ Config :: struct {
 	filtermode:      FilterMode,
 }
 
-foreign import lib {"libraudio.a", "libfreetype.a", "liblyte_core.a", "libphysfs.a", "libglfw3.a", "system:png", "system:z", "system:Cocoa.framework", "system:IOKit.framework", "system:OpenGL.framework"
-//
+when ODIN_OS == .Windows {
+	// foreign import lib "" // "windows/rayguidll.lib" when RAYGUI_SHARED else "windows/raygui.lib",
+
+} else when ODIN_OS == .Linux {
+	// foreign import lib "" // "linux/libraygui.so" when RAYGUI_SHARED else "linux/libraygui.a",
+
+} else when ODIN_OS == .Darwin {
+	when ODIN_ARCH == .arm64 {
+		foreign import lib {"lyte_mac_arm/libraudio.a", "lyte_mac_arm/libfreetype.a", "lyte_mac_arm/liblyte_core.a", "lyte_mac_arm/libphysfs.a", "lyte_mac_arm/libglfw3.a", "system:png", "system:z", "system:Cocoa.framework", "system:IOKit.framework", "system:OpenGL.framework"}
+	} else {
+		// foreign import lib "" // "macos/libraygui.dylib" when RAYGUI_SHARED else "macos/libraygui.a",
+	}
+} else when ODIN_ARCH == .wasm32 || ODIN_ARCH == .wasm64p32 {
+	foreign import lib {LYTE_CORE_WASM_LIB}
 }
+// else {
+// 	// foreign import lib ""
+// }
 
 
 @(default_calling_convention = "c", link_prefix = "lyte_")
